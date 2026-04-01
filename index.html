@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>程式地獄：對戰大魔王川普</title>
+    <style>
+        /* 核心主題與視覺風格 */
+        :root {
+            --term-green: #0f0;
+            --bg-black: #000;
+        }
+
+        body, html {
+            background-color: var(--bg-black);
+            color: var(--term-green);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* CRT 螢幕掃描線濾鏡 */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg, 
+                rgba(255, 0, 0, 0.04), 
+                rgba(0, 255, 0, 0.02), 
+                rgba(0, 0, 255, 0.04)
+            );
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* 遊戲主容器 */
+        #game-container {
+            width: 800px;
+            height: 600px;
+            border: 2px solid var(--term-green);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* 戰鬥畫面區域 */
+        .battle-arena {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 250px;
+            border-bottom: 1px dashed var(--term-green);
+            padding-bottom: 20px;
+            margin-bottom: 15px;
+        }
+
+        .character-box {
+            text-align: center;
+            width: 250px;
+        }
+
+        /* 玩家圖片：左右反轉 */
+        .player-sprite {
+            width: 150px;
+            transform: scaleX(-1);
+            filter: drop-shadow(0 0 5px var(--term-green));
+        }
+
+        /* 魔王圖片：紅色 drop-shadow 光暈 */
+        .boss-sprite {
+            width: 180px;
+            filter: drop-shadow(0 0 15px #f00);
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* 文字日誌輸出區 */
+        #log-window {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            font-size: 15px;
+            line-height: 1.6;
+            background: rgba(0, 20, 0, 0.4);
+        }
+
+        /* 隱藏原生捲軸以維持終端機風格 */
+        #log-window::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            background-color: var(--bg-black);
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--term-green);
+            color: var(--bg-black);
+            font-weight: bold;
+        }
+
+        button:disabled {
+            border-color: #050;
+            color: #050;
+            cursor: not-allowed;
+        }
+
+        .warning { color: #f00; text-shadow: 0 0 5px #f00; }
+        .system { color: #0ff; }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+
+    <div id="game-container">
+        <div class="battle-arena">
+            <div class="character-box">
+                <img src="https://github.com/lpp0210-tech/2D/blob/main/images-removebg-preview%20(1).png?raw=true" alt="玩家" class="player-sprite">
+                <div class="stats">
+                    > 玩家 HP: <span id="player-hp">150</span> / 150
+                </div>
+            </div>
+
+            <div class="character-box">
+                <img src="https://github.com/lpp0210-tech/2D/blob/main/images__1_-removebg-preview%20(1).png?raw=true" alt="大魔王川普" class="boss-sprite">
+                <div class="stats warning">
+                    > 川普 HP: <span id="boss-hp">10000</span> / 10000
+                </div>
+            </div>
+        </div>
+
+        <div id="log-window">
+            <div class="system">> INITIALIZING COMBAT PROTOCOL...</div>
+            <div class="system">> CONNECTION ESTABLISHED.</div>
+            <div class="warning">> 警告：偵測到巨大的地緣政治防火牆「大魔王川普」。</div>
+            <div>> 玩家，請輸入攻擊指令。</div>
+        </div>
+
+        <div class="control-panel">
+            <button onclick="executeAction('attack')">[CMD] 強制抹除 (ATK 700)</button>
+            <button onclick="executeAction('hack')">[CMD] 緩衝溢位 (機率癱瘓)</button>
+            <button onclick="executeAction('overclock')">[CMD] 核心超頻 (傷害 200%)</button>
+            <button onclick="executeAction('reboot')">[CMD] 系統重啟 (回復 HP)</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
